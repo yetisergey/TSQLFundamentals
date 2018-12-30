@@ -29,9 +29,21 @@ FROM (SELECT
 PIVOT (COUNT(orderyear) FOR orderyear IN ([2007], [2008], [2009])) AS p
 
 --4
-SELECT empid, qty
-  FROM (SELECT * dbo.EmpYearOrders) AS e
-  UNPIVOT(qty FOR COUNT(empid) IN (cnt2007, cnt2008, cnt2009)) AS U;
+SELECT
+  *
+FROM (SELECT
+    eyo.empid
+   ,CASE
+      WHEN emp.orderyear = '2007' THEN eyo.cnt2007
+      WHEN emp.orderyear = '2008' THEN eyo.cnt2008
+      WHEN emp.orderyear = '2009' THEN eyo.cnt2009
+    END
+    AS qty
+   ,emp.orderyear
+  FROM dbo.EmpYearOrders eyo
+  CROSS JOIN (VALUES ('2007'), ('2008'), ('2009'))
+  AS emp (orderyear)) AS r
+WHERE r.qty > 0
 
 --5
 SELECT
